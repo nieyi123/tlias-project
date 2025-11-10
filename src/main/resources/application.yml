@@ -1,0 +1,34 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB      # 单个文件大小限制
+      max-request-size: 100MB  # 总请求大小限制
+  application:
+    name: tlias-web-management
+
+# 数据库连接
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.16.129:3307/tlias?useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123
+
+
+# mybatis
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:mapper/*.xml
+
+pagehelper:
+  reasonable: true
+  helper-dialect: mysql
+
+#spring事务管理日志
+logging:
+  level:
+    org.springframework.jdbc.support.JdbcTransactionManager: debug
+
+server:
+  port: 8080

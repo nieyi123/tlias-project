@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yjj.mapper.ClazzMapper">
+
+    <select id="list" resultType="com.yjj.pojo.Clazz">
+        SELECT
+        c.id,
+        c.name,
+        c.room,
+        c.begin_date AS beginDate,
+        c.end_date AS endDate,
+        c.master_id AS masterId,
+        c.create_time AS createTime,
+        c.update_time AS updateTime,
+        e.name AS masterName,
+        CASE
+        WHEN CURDATE() > c.end_date THEN '已结课'
+        WHEN CURDATE() &lt; c.begin_date THEN '未开班'
+        ELSE '在读中'
+        END AS status
+        FROM clazz c
+        LEFT JOIN emp e ON c.master_id = e.id
+        <where>
+            <!-- 班级名称模糊查询 -->
+            <if test="name != null and name != ''">
+                AND c.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <!-- 结课时间范围查询 -->
+            <if test="begin != null">
+                AND c.end_date >= #{begin}
+            </if>
+            <if test="end != null">
+                AND c.end_date &lt;= #{end}
+            </if>
+        </where>
+        ORDER BY c.update_time DESC
+    </select>
+
+    <update id="update">
+        UPDATE clazz
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="room != null and room != ''">
+                room = #{room},
+            </if>
+            <if test="beginDate != null">
+                begin_date = #{beginDate},
+            </if>
+            <if test="endDate != null">
+                end_date = #{endDate},
+            </if>
+            <if test="masterId != null">
+                master_id = #{masterId},
+            </if>
+            <if test="subject != null">
+                subject = #{subject},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="getById" resultType="com.yjj.pojo.Clazz">
+        SELECT
+            c.id,
+            c.name,
+            c.room,
+            c.begin_date AS beginDate,
+            c.end_date AS endDate,
+            c.master_id AS masterId,
+            c.subject,
+            e.name AS masterName
+        FROM clazz c
+        LEFT JOIN emp e ON c.master_id = e.id
+        WHERE c.id = #{id}
+    </select>
+
+    <!-- 班级学生人数统计 -->
+    <select id="countSubjectData" resultType="java.util.Map">
+        SELECT
+            c.name AS name,
+            COUNT(s.id) AS value
+        FROM clazz c
+        LEFT JOIN student s ON c.id = s.clazz_id
+        GROUP BY c.id, c.name
+        ORDER BY c.id
+    </select>
+
+</mapper>

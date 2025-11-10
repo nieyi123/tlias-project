@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yjj.mapper.StudentMapper">
+    <select id="list" resultType="com.yjj.pojo.Student">
+        SELECT
+        s.id,
+        s.no,
+        s.name,
+        s.gender,
+        s.phone,
+        s.id_card AS idCard,
+        s.degree,
+        s.graduation_date AS graduationDate,
+        s.is_college AS isCollege,
+        s.clazz_id AS clazzId,
+        s.address,
+        s.violation_count AS violationCount,
+        s.violation_score AS violationScore,
+        s.create_time AS createTime,
+        s.update_time AS updateTime,
+        c.name AS clazzName
+        FROM student s
+        LEFT JOIN clazz c ON s.clazz_id = c.id
+        <where>
+            <if test="name != null and name != ''">
+                AND s.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="degree != null">
+                AND s.degree = #{degree}
+            </if>
+            <if test="clazzId != null">
+                AND s.clazz_id = #{clazzId}
+            </if>
+        </where>
+        ORDER BY s.update_time DESC
+    </select>
+    <insert id="save">
+        INSERT INTO student(no, name, gender, phone, id_card, degree, graduation_date, is_college, clazz_id, address, violation_count, violation_score, create_time, update_time) VALUES (#{no}, #{name}, #{gender}, #{phone}, #{idCard}, #{degree}, #{graduationDate}, #{isCollege}, #{clazzId}, #{address}, #{violationCount}, #{violationScore}, #{createTime}, #{updateTime})
+    </insert>
+    <select id = "getById" resultType="com.yjj.pojo.Student">
+        SELECT
+        s.id,
+        s.no,
+        s.name,
+        s.gender,
+        s.phone,
+        s.id_card AS idCard,
+        s.degree,
+        s.graduation_date AS graduationDate,
+        s.is_college AS isCollege,
+        s.clazz_id AS clazzId,
+        s.address,
+        s.violation_count AS violationCount,
+        s.violation_score AS violationScore,
+        s.create_time AS createTime,
+        s.update_time AS updateTime
+        FROM student s
+        WHERE s.id = #{id}
+    </select>
+    <update id="update">
+        UPDATE student SET no = #{no}, name = #{name}, gender = #{gender}, phone = #{phone}, id_card = #{idCard}, degree = #{degree}, graduation_date = #{graduationDate}, is_college = #{isCollege}, clazz_id = #{clazzId}, address = #{address}, violation_count = #{violationCount}, violation_score = #{violationScore}, update_time = #{updateTime} WHERE id = #{id}
+    </update>
+    <delete id="deleteByIds">
+        DELETE FROM student WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+<!--    学员学历统计-->
+    <select id="countEducationData" resultType="java.util.Map">
+        SELECT
+        CASE degree
+            WHEN 1 THEN '初中'
+            WHEN 2 THEN '高中'
+            WHEN 3 THEN '大专'
+            WHEN 4 THEN '本科'
+            WHEN 5 THEN '硕士'
+            WHEN 6 THEN '博士'
+            ELSE '未知'
+        END AS name,
+        COUNT(1) AS value
+        FROM student
+        GROUP BY degree
+    </select>
+</mapper>
